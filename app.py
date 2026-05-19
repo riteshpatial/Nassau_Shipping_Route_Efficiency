@@ -191,26 +191,27 @@ st.markdown('<div class="section-title">Regional & Factory Breakdown</div>', uns
 ch3, ch4 = st.columns(2)
 
 with ch3:
-    region_stats = filtered.groupby('Region').agg(
+    region_stats = filtered.groupby('Region', as_index=False).agg(
         Shipments=('Order ID', 'count'),
         Avg_Lead=('Shipping Lead Time', 'mean'),
         Delay_Rate=('Delayed', 'mean')
-    ).reset_index()
+    )
     region_stats['Delay_Rate'] = (region_stats['Delay_Rate'] * 100).round(1)
     region_stats['Avg_Lead']   = region_stats['Avg_Lead'].round(2)
-    fig_region = px.scatter(
-        region_stats, x='Avg_Lead', y='Delay_Rate',
-        size='Shipments', color='Region', text='Region',
-        title='Region: Avg Lead Time vs Delay Rate',
-        labels={'Avg_Lead': 'Avg Lead Time (days)', 'Delay_Rate': 'Delay Rate (%)'}
+    region_stats = region_stats.sort_values('Delay_Rate', ascending=True)
+    fig_region = px.bar(
+        region_stats, x='Delay_Rate', y='Region', orientation='h',
+        color='Delay_Rate', color_continuous_scale=['#16a34a', '#d97706', '#dc2626'],
+        title='Delay Rate by Region (%)',
+        text=region_stats['Delay_Rate'].astype(str) + '%'
     )
-    fig_region.update_traces(textposition='top center')
     fig_region.update_layout(
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         font_family='Inter', title_font_size=14,
         margin=dict(t=40, b=10, l=10, r=10),
-        showlegend=False
+        coloraxis_showscale=False, xaxis_title='', yaxis_title=''
     )
+    fig_region.update_traces(textposition='outside')
     st.plotly_chart(fig_region, use_container_width=True)
 
 with ch4:
@@ -236,11 +237,10 @@ with ch4:
 st.markdown('<div class="section-title">Lead Time Distribution</div>', unsafe_allow_html=True)
 fig_box = px.box(
     filtered, x='Ship Mode', y='Shipping Lead Time',
-    color='Ship Mode',
-    color_discrete_sequence=['#1d4ed8', '#16a34a', '#d97706', '#dc2626'],
     title='Lead Time Distribution by Ship Mode',
     labels={'Shipping Lead Time': 'Lead Time (days)', 'Ship Mode': ''}
 )
+fig_box.update_traces(marker_color='#1d4ed8', line_color='#1d4ed8')
 fig_box.add_hline(y=delay_limit, line_dash='dash', line_color='#dc2626',
                   annotation_text=f'Delay threshold ({delay_limit}d)',
                   annotation_position='top right')
