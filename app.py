@@ -254,11 +254,7 @@ st.plotly_chart(fig_box, use_container_width=True)
 
 # ── Route Leaderboard Table ───────────────────────────────────────────
 st.markdown('<div class="section-title">Route Efficiency Leaderboard</div>', unsafe_allow_html=True)
-st.dataframe(
-    route_perf.style.background_gradient(subset=['Avg Lead Time (days)'], cmap='RdYlGn_r')
-                    .background_gradient(subset=['Delay Rate (%)'],       cmap='Reds'),
-    use_container_width=True, height=340
-)
+st.dataframe(route_perf, use_container_width=True, height=340)
 
 # ── Export ────────────────────────────────────────────────────────────
 st.markdown('<div class="section-title">Export</div>', unsafe_allow_html=True)
